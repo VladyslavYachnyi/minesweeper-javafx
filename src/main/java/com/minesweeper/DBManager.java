@@ -1,5 +1,8 @@
 package com.minesweeper;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.*;
 
 public class DBManager {
@@ -7,16 +10,28 @@ public class DBManager {
     private final String url;
 
     public DBManager(String databasePath) {
-        // databasePath = "data/leaderboard.db"
+        ensureParentDirExists(databasePath);
+
         this.url = "jdbc:sqlite:" + databasePath;
         ensureTableExists();
+    }
+
+    private void ensureParentDirExists(String databasePath) {
+        try {
+            Path path = Paths.get(databasePath);
+            Path parent = path.getParent();
+            if (parent != null) {
+                Files.createDirectories(parent);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create database directory", e);
+        }
     }
 
     private Connection getConnection() throws SQLException {
         return DriverManager.getConnection(url);
     }
 
-    // создаём таблицу, если её нет
     private void ensureTableExists() {
         String sql = """
             CREATE TABLE IF NOT EXISTS leaderboard (
@@ -25,9 +40,7 @@ public class DBManager {
                 difficulty TEXT NOT NULL
             )
             """;
-
-        try (Connection c = getConnection();
-             Statement st = c.createStatement()) {
+        try (Connection c = getConnection(); Statement st = c.createStatement()) {
             st.execute(sql);
         } catch (SQLException e) {
             e.printStackTrace();
