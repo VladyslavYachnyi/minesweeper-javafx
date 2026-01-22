@@ -11,7 +11,7 @@ Classic Minesweeper game implemented as a desktop application using JavaFX.
 - Maven build system
 
 ## Technologies
-- Java 17 / 21
+- Java 21
 - JavaFX
 - Maven
 - SQLite
